@@ -18759,6 +18759,9 @@ var Map = function (_Component) {
 
             var zoom = this.props.zoom;
 
+            // 在 centerAndZoom() 之前执行事件绑定否则load无法正常触发
+            this.bindEvent(map, this.events);
+
             if ((0, _common.isString)(this.props.center)) {
                 // 可以传入城市名
                 map.centerAndZoom(this.props.center);
@@ -18769,7 +18772,6 @@ var Map = function (_Component) {
             }
 
             this.bindToggleMeghods(map, this.toggleMethods);
-            this.bindEvent(map, this.events);
 
             var lastZoom = zoom;
             map.addEventListener('zoomend', function () {
@@ -29131,8 +29133,23 @@ CustomOverlay.prototype = new BMap.Overlay();
 CustomOverlay.prototype.initialize = function (map) {
     this._map = map;
     var div = this._div = document.createElement("div");
+    div.setAttribute('tag', 'customoverlay');
     div.style.position = "absolute";
     div.style.zIndex = BMap.Overlay.getZIndex(this._point.lat);
+    div.addEventListener('touchstart', function (e) {
+        e.stopPropagation();
+        console.log('touchstart');
+    });
+    /*
+    div.addEventListener('touchmove', function (e) {
+        e.stopPropagation();
+        console.log('touchmove');
+    });
+    */
+    div.addEventListener('touchend', function (e) {
+        e.stopPropagation();
+        console.log('touchend');
+    });
     if (Object.prototype.toString.call(this.content) == "[object String]") {
         div.innerHTML = this.content;
     } else {
@@ -29764,9 +29781,9 @@ var App = function (_Component) {
                 points = points.concat(this.getRoadPoints(this.props.roadPath));
             }
 
-            if (points.length > 0 && this.props.autoViewport !== false) {
-                this.props.map.setViewport(points, this.props.viewportOptions);
-            }
+            //         if (points.length > 0 && this.props.autoViewport !== false) {
+            //             this.props.map.setViewport(points, this.props.viewportOptions);
+            //         }
         }
     }, {
         key: 'getRoadGroup',
@@ -29806,7 +29823,7 @@ var App = function (_Component) {
             ctx.beginPath();
             var lineWidth = this.props.lineWidth || 10;
             _mapLine2.default.drawRoads(map, ctx, roadGroup.allPath, {
-                color: '#fff',
+                color: this.props.bgColor || '#fff',
                 lineWidth: lineWidth + 4,
                 lineCap: 'butt',
                 arrow: false,
@@ -29852,7 +29869,7 @@ var App = function (_Component) {
                         } else if (_this3.props.roadPath) {
                             isClick = _this3.isClick(map, e.pixel, _this3.props.roadPath);
                             if (isClick) {
-                                _this3.props.onClick();
+                                _this3.props.onClick(e);
                             }
                         }
                     });
@@ -29895,7 +29912,7 @@ var App = function (_Component) {
             var data = roadGroup.group;
 
             _mapLine2.default.drawRoads(this.props.map, ctx, roadGroup.allPath, {
-                color: '#fff',
+                color: this.props.bgColor || '#fff',
                 coordType: this.props.coordType,
                 lineWidth: lineWidth + 4,
                 lineCap: 'butt',
@@ -29924,7 +29941,8 @@ var App = function (_Component) {
                 lineCap: 'butt',
                 arrow: this.props.isShowArrow !== false ? {
                     width: 5,
-                    height: 3
+                    height: 3,
+                    color: this.props.arrowColor
                 } : false
             });
         }
@@ -30140,7 +30158,7 @@ var mapLine = {
                 ctx.restore();
             }
         });
-        ctx.strokeStyle = '#fff';
+        ctx.strokeStyle = options.arrow.color || '#fff';
         ctx.lineWidth = 3;
         ctx.stroke();
     }
@@ -31808,7 +31826,7 @@ function DraggingTip(options) {
 
     this.map = map;
     var tip = this.tip = new _Tip2.default(options);
-    var icon = new BMap.Icon("http://huiyan.baidu.com/github/tools/gis-drawing/static/images/drag.png", new BMap.Size(25, 25), {
+    var icon = new BMap.Icon("//huiyan.baidu.com/github/tools/gis-drawing/static/images/drag.png", new BMap.Size(25, 25), {
         imageSize: new BMap.Size(25, 25)
     });
     var marker = this.marker = new BMap.Marker(this.point);
@@ -33104,7 +33122,9 @@ var App = function (_Component) {
                 //    2: 'yellow',
                 //    3: '#ff5e47'
                 //}} 
-                , { color: '#1495ff',
+                , { color: 'rgba(0,255,0,0.7)',
+                    bgColor: 'rgba(255,255,255,0.1)',
+                    arrowColor: 'rgba(255,0,0,0.7)',
                     lineWidth: 10,
                     roadPath: ["116.488838,39.911212,116.489818,39.911292,116.490838,39.911387", "116.490838,39.911387,116.491164,39.911424,116.491454,39.911463,116.491707,39.911499,116.491926,39.911536,116.492145,39.911582,116.492374,39.911637,116.492781,39.911755,116.493174,39.911884,116.493791,39.912089,116.494033,39.91217,116.494171,39.912216", "116.494171,39.912216,116.494771,39.912415,116.495098,39.912526,116.495156,39.912544,116.495428,39.912634,116.49559,39.912688,116.4958,39.912758,116.496114,39.912863,116.496263,39.912913,116.496354,39.912943,116.496514,39.912997,116.496613,39.913029,116.496777,39.913084", "116.496777,39.913084,116.496997,39.913158,116.497585,39.913355", "116.497585,39.913355,116.497732,39.913434,116.498083,39.913551,116.498295,39.913652,116.49836,39.913686,116.498457,39.913737,116.498528,39.913779,116.498601,39.913832,116.498694,39.913925,116.498763,39.914018,116.498811,39.914114,116.498817,39.914134,116.498848,39.914243,116.498865,39.914342,116.498871,39.914375,116.498884,39.914527,116.498879,39.914676,116.498871,39.91473,116.498858,39.91482,116.498842,39.914863,116.49881,39.914955,116.498736,39.915081,116.498631,39.915198,116.498495,39.915309,116.498321,39.915415,116.498089,39.915526,116.497796,39.915617,116.497515,39.915734,116.497409,39.915771,116.497312,39.915814,116.497199,39.915898,116.497065,39.916021,116.496761,39.916372", "116.496761,39.916372,116.49673,39.916463", "116.49673,39.916463,116.496729,39.916465,116.496689,39.916608,116.496668,39.916691", "116.496668,39.916691,116.496647,39.916774", "116.496647,39.916774,116.496604,39.916953,116.496585,39.917192,116.49654,39.917395,116.496522,39.917438,116.496496,39.917537"],
                     onClick: function onClick(index) {
