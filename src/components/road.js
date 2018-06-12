@@ -50,9 +50,9 @@ export default class App extends Component {
             points = points.concat(this.getRoadPoints(this.props.roadPath));
         }
 
-        if (points.length > 0 && this.props.autoViewport !== false) {
-            this.props.map.setViewport(points, this.props.viewportOptions);
-        }
+//         if (points.length > 0 && this.props.autoViewport !== false) {
+//             this.props.map.setViewport(points, this.props.viewportOptions);
+//         }
     }
 
     getRoadGroup(roadPath, category, splitList) {
@@ -133,7 +133,7 @@ export default class App extends Component {
                     } else if (this.props.roadPath) {
                         isClick = this.isClick(map, e.pixel, this.props.roadPath);
                         if (isClick) {
-                            this.props.onClick();
+                            this.props.onClick(e);
                         }
                     }
 
